@@ -176,7 +176,7 @@ export default function MyManagementQueuePage() {
     try {
       await batchCompleteManagementQueue({
         ids: Array.from(selectedIds),
-        note: note || undefined,
+        note: note ?? '',
       })
 
       alert('처리 완료되었습니다')

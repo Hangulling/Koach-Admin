@@ -35,7 +35,7 @@ export default function PromptsTestAndApplyPage() {
   const [testOutput, setTestOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
-  const [activePrompt, setActivePrompt] = useState<PromptActiveResponse | null>(null)
+  const [_activePrompt, setActivePrompt] = useState<PromptActiveResponse | null>(null)
   const [reviewTickets, setReviewTickets] = useState<ReviewTicketListResponse | null>(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [selectedTicketIds, setSelectedTicketIds] = useState<number[]>([])
