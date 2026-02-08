@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+import api from '../api'
 
 export interface PromptTestRequest {
   agentType: string;
@@ -106,13 +106,7 @@ export interface PromptRollbackRequest {
   previousVersionId: number;
 }
 
-const getAuthHeaders = () => {
-  const token = sessionStorage.getItem('accessToken');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
+const BASE = '/api/admin/prompts'
 
 /**
  * Active 프롬프트 조회
@@ -129,17 +123,8 @@ export const getActivePrompt = async (
     intimacyLevel: intimacyLevel.toString(),
     ...(env && { env }),
   });
-
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/active?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('Active 프롬프트 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<PromptActiveResponse>(`${BASE}/active?${params}`);
+  return data;
 };
 
 /**
@@ -152,23 +137,14 @@ export const testPrompt = async (
   inputText: string,
   promptVersionId?: number
 ): Promise<PromptTestResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/test`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      agentType,
-      concept,
-      intimacyLevel,
-      inputText,
-      ...(promptVersionId && { promptVersionId }),
-    }),
+  const { data } = await api.post<PromptTestResponse>(`${BASE}/test`, {
+    agentType,
+    concept,
+    intimacyLevel,
+    inputText,
+    ...(promptVersionId != null && { promptVersionId }),
   });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 테스트 실패');
-  }
-
-  return response.json();
+  return data;
 };
 
 /**
@@ -181,23 +157,14 @@ export const createPromptVersion = async (
   content: string,
   memo?: string
 ): Promise<PromptVersionResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/versions`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      agentType,
-      concept,
-      intimacyLevel,
-      content,
-      memo,
-    }),
+  const { data } = await api.post<PromptVersionResponse>(`${BASE}/versions`, {
+    agentType,
+    concept,
+    intimacyLevel,
+    content,
+    memo,
   });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 버전 생성 실패');
-  }
-
-  return response.json();
+  return data;
 };
 
 /**
@@ -210,21 +177,13 @@ export const activatePrompt = async (
   intimacyLevel: number,
   versionId: number
 ): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/activate`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      env,
-      agentType,
-      concept,
-      intimacyLevel,
-      versionId,
-    }),
+  await api.post(`${BASE}/activate`, {
+    env,
+    agentType,
+    concept,
+    intimacyLevel,
+    versionId,
   });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 활성화 실패');
-  }
 };
 
 /**
@@ -237,21 +196,13 @@ export const rollbackPrompt = async (
   intimacyLevel: number,
   previousVersionId: number
 ): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/rollback`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      env,
-      agentType,
-      concept,
-      intimacyLevel,
-      previousVersionId,
-    }),
+  await api.post(`${BASE}/rollback`, {
+    env,
+    agentType,
+    concept,
+    intimacyLevel,
+    previousVersionId,
   });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 롤백 실패');
-  }
 };
 
 /**
@@ -273,17 +224,8 @@ export const getPromptVersions = async (
     size: size.toString(),
     env,
   });
-
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/versions?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 버전 목록 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<PromptVersionListResponse>(`${BASE}/versions?${params}`);
+  return data;
 };
 
 /**
@@ -291,20 +233,12 @@ export const getPromptVersions = async (
  */
 export const getPromptVersion = async (versionId: number, env: string = 'prod'): Promise<PromptVersionResponse> => {
   const params = new URLSearchParams({ env });
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/versions/${versionId}?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 버전 상세 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<PromptVersionResponse>(`${BASE}/versions/${versionId}?${params}`);
+  return data;
 };
 
 /**
- * 현재 파일 내용 조회
+ * 현재 파일 내용 조회 (파일 없으면 404 → 빈 문자열 반환)
  */
 export const getPromptFileContent = async (
   agentType: string,
@@ -316,66 +250,38 @@ export const getPromptFileContent = async (
     concept,
     intimacyLevel: intimacyLevel.toString(),
   });
-
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/file-content?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 파일 내용 조회 실패');
+  try {
+    const { data } = await api.get<{ content?: string }>(`${BASE}/file-content?${params}`);
+    return data?.content ?? '';
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 404) return '';
+    throw err;
   }
-
-  const data = await response.json();
-  return data.content;
 };
 
 /**
  * AgentType 옵션 조회
  */
 export const getAgentTypeOptions = async (): Promise<AgentTypeOption[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/options/agent-types`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('AgentType 옵션 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<AgentTypeOption[]>(`${BASE}/options/agent-types`);
+  return data;
 };
 
 /**
  * Concept 옵션 조회
  */
 export const getConceptOptions = async (): Promise<ConceptOption[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/options/concepts`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('Concept 옵션 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<ConceptOption[]>(`${BASE}/options/concepts`);
+  return data;
 };
 
 /**
  * IntimacyLevel 옵션 조회
  */
 export const getIntimacyLevelOptions = async (): Promise<IntimacyLevelOption[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/options/intimacy-levels`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('IntimacyLevel 옵션 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<IntimacyLevelOption[]>(`${BASE}/options/intimacy-levels`);
+  return data;
 };
 
 /**
@@ -384,17 +290,8 @@ export const getIntimacyLevelOptions = async (): Promise<IntimacyLevelOption[]> 
 export const saveAndActivatePrompt = async (
   request: PromptSaveAndActivateRequest
 ): Promise<PromptVersionResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/save-and-activate`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    throw new Error('프롬프트 저장 및 적용 실패');
-  }
-
-  return response.json();
+  const { data } = await api.post<PromptVersionResponse>(`${BASE}/save-and-activate`, request);
+  return data;
 };
 
 /**
@@ -405,14 +302,8 @@ export const getVersionActiveStatus = async (
   env: string = 'prod'
 ): Promise<VersionActiveStatusResponse> => {
   const params = new URLSearchParams({ env });
-  const response = await fetch(`${API_BASE_URL}/api/admin/prompts/versions/${versionId}/active-status?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('버전 활성화 상태 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<VersionActiveStatusResponse>(
+    `${BASE}/versions/${versionId}/active-status?${params}`
+  );
+  return data;
 };
