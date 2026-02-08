@@ -13,7 +13,7 @@ export interface ChatroomOption {
   id: string
   name: string
   concept: string
-  userEmailSnapshot: string
+  userEmail: string
 }
 
 /**
