@@ -3,6 +3,7 @@ import api from '../api';
 export interface AdminAuditLogResponse {
   id: number;
   adminUserId: string;
+  adminUserEmail?: string | null;
   actionType: string;
   targetType?: string | null;
   targetId?: number | null;
