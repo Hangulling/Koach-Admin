@@ -82,7 +82,7 @@ export default function MyChatLogDetailPage() {
 
   // 뒤로 가기
   const handleBack = () => {
-    navigate('/my/chat-logs')
+    navigate('/admin/chat-management/chat-logs')
   }
 
   // 타입별 렌더링

@@ -8,9 +8,8 @@ const ChatLogsUserHistoryPage = lazy(() => import('../pages/admin/ChatLogsUserHi
 const ChatLogsManagementNeededPage = lazy(() => import('../pages/admin/ChatLogsManagementNeededPage'))
 const PromptsTestAndApplyPage = lazy(() => import('../pages/admin/PromptsTestAndApplyPage'))
 const PromptVersionsPage = lazy(() => import('../pages/admin/PromptVersionsPage'))
-const HistoryPage = lazy(() => import('../pages/admin/HistoryPage'))
+// HistoryPage는 라우터에서 제거 (파일 삭제 보류)
 
-// 추가
 const MyChatLogListPage = lazy(() => import('../pages/admin/MyChatLogListPage'))
 const MyChatLogDetailPage = lazy(() => import('../pages/admin/MyChatLogDetailPage'))
 const MyManagementQueuePage = lazy(() => import('../pages/admin/MyManagementQueuePage'))
@@ -60,17 +59,9 @@ export function Routes() {
           </AdminPrivateRoute>
         }
       />
+      {/* 채팅 내역 관리 */}
       <Route
-        path="/history"
-        element={
-          <AdminPrivateRoute>
-            <HistoryPage />
-          </AdminPrivateRoute>
-        }
-      />
-
-      <Route
-        path="/my/chat-logs"
+        path="/admin/chat-management/chat-logs"
         element={
           <AdminPrivateRoute>
             <MyChatLogListPage />
@@ -78,7 +69,7 @@ export function Routes() {
         }
       />
       <Route
-        path="/my/chat-logs/:chatroomId"
+        path="/admin/chat-management/chat-logs/:chatroomId"
         element={
           <AdminPrivateRoute>
             <MyChatLogDetailPage />
@@ -86,15 +77,17 @@ export function Routes() {
         }
       />
       <Route
-        path="/my/management-queue"
+        path="/admin/chat-management/management-queue"
         element={
           <AdminPrivateRoute>
             <MyManagementQueuePage />
           </AdminPrivateRoute>
         }
       />
+
+      {/* 아카이브 관리 */}
       <Route
-        path="/my/audit-logs"
+        path="/admin/archive/audit-logs"
         element={
           <AdminPrivateRoute>
             <MyAuditLogPage />
