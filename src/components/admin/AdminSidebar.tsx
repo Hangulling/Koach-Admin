@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAdminUser } from '../../hooks/useAdminUser'
 import { adminLogout } from '../../api/admin/auth'
@@ -51,6 +51,20 @@ export default function AdminSidebar() {
   const userName = user?.name || '로딩 중...'
   const adminId = user?.id || '로딩 중...'
 
+  // 현재 경로에 해당하는 메뉴가 속한 섹션은 펼쳐 두기 (해당 메뉴 하이라이트가 보이도록)
+  useEffect(() => {
+    const pathname = location.pathname
+    for (const section of menuSections) {
+      const hasActive = section.items.some(
+        item => pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path + '/'))
+      )
+      if (hasActive) {
+        setExpandedSections(prev => (prev.has(section.title) ? prev : new Set(prev).add(section.title)))
+        break
+      }
+    }
+  }, [location.pathname])
+
   const toggleSection = (title: string) => {
     setExpandedSections(prev => {
       const next = new Set(prev)
@@ -63,8 +77,12 @@ export default function AdminSidebar() {
     })
   }
 
+  // 현재 경로와 일치하거나 그 하위 경로(예: /my/chat-logs/123)일 때 활성
   const isActive = (path: string) => {
-    return location.pathname === path
+    const pathname = location.pathname
+    if (pathname === path) return true
+    if (path !== '/' && pathname.startsWith(path + '/')) return true
+    return false
   }
 
   const handleLogout = async () => {

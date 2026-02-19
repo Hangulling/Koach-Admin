@@ -33,10 +33,7 @@ export const searchChatLogs = async (
 ): Promise<ChatLogListPageResponse> => {
   const searchParams = new URLSearchParams()
 
-  // 필수 파라미터
   searchParams.set('startDate', params.startDate)
-
-  // 선택 파라미터
   if (params.endDate) searchParams.set('endDate', params.endDate)
   if (params.chatroomId) searchParams.set('chatroomId', params.chatroomId)
   if (params.intimacyLevel !== undefined) {

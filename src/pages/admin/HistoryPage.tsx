@@ -117,7 +117,7 @@ export default function HistoryPage() {
                   {logs.content.map((log) => (
                     <tr key={log.id} className="border-b border-gray-100">
                       <td className="py-3 px-4 text-sm">{new Date(log.createdAt).toLocaleString()}</td>
-                      <td className="py-3 px-4 text-sm">{log.adminUserId}</td>
+                      <td className="py-3 px-4 text-sm">{log.adminUserEmail ?? log.adminUserId}</td>
                       <td className="py-3 px-4 text-sm">{log.actionType}</td>
                       <td className="py-3 px-4 text-sm">
                         {log.targetType || '-'} {log.targetId ? `#${log.targetId}` : ''}

@@ -55,12 +55,17 @@ export default function MyManagementQueuePage() {
         20
       )
 
-      setQueues(response.content)
-      setTotalPages(response.page.totalPages)
-      setTotalElements(response.page.totalElements)
+      const content = Array.isArray(response?.content) ? response.content : []
+      const pageInfo = response?.page
+      setQueues(content)
+      setTotalPages(pageInfo?.totalPages ?? 0)
+      setTotalElements(pageInfo?.totalElements ?? 0)
     } catch (err) {
       console.error('목록 조회 실패:', err)
       setError('목록을 불러오는데 실패했습니다')
+      setQueues([])
+      setTotalPages(0)
+      setTotalElements(0)
     } finally {
       setIsLoading(false)
     }

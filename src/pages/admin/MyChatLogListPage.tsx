@@ -55,7 +55,6 @@ export default function MyChatLogListPage() {
 
   // 검색 실행
   const handleSearch = async (page: number = 0) => {
-    // 날짜 유효성 검사
     if (!year || !month || !day) {
       setError('년/월/일을 모두 입력해주세요')
       return
@@ -63,18 +62,15 @@ export default function MyChatLogListPage() {
 
     const monthNum = parseInt(month)
     const dayNum = parseInt(day)
-
     if (monthNum < 1 || monthNum > 12) {
       setError('월은 1~12 사이여야 합니다')
       return
     }
-
     if (dayNum < 1 || dayNum > 31) {
       setError('일은 1~31 사이여야 합니다')
       return
     }
 
-    // 날짜 포맷팅 (yyyy-MM-dd)
     const startDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 
     try {

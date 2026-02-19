@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+import api from '../api'
 
 export interface ReviewTicketResponse {
   id: number;
@@ -59,13 +59,7 @@ export interface ReviewTicketCreateRequest {
   }[];
 }
 
-const getAuthHeaders = () => {
-  const token = sessionStorage.getItem('accessToken');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
+const BASE = '/api/admin/review-tickets'
 
 /**
  * 티켓 목록 조회
@@ -82,17 +76,8 @@ export const getReviewTickets = async (
     size: size.toString(),
     ...(agentType && { agentType }),
   });
-
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 목록 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<ReviewTicketListResponse>(`${BASE}?${params}`);
+  return data;
 };
 
 /**
@@ -100,17 +85,8 @@ export const getReviewTickets = async (
  */
 export const getReviewTicketCounts = async (status: string = 'OPEN'): Promise<ReviewTicketCountsResponse> => {
   const params = new URLSearchParams({ status });
-
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets/counts?${params}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 카운트 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<ReviewTicketCountsResponse>(`${BASE}/counts?${params}`);
+  return data;
 };
 
 /**
@@ -120,46 +96,22 @@ export const updateReviewTicket = async (
   ticketId: number,
   note: string
 ): Promise<ReviewTicketResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets/${ticketId}`, {
-    method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ note }),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 메모 수정 실패');
-  }
-
-  return response.json();
+  const { data } = await api.patch<ReviewTicketResponse>(`${BASE}/${ticketId}`, { note });
+  return data;
 };
 
 /**
  * 티켓 삭제
  */
 export const deleteReviewTicket = async (ticketId: number): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets/${ticketId}`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 삭제 실패');
-  }
+  await api.delete(`${BASE}/${ticketId}`);
 };
 
 /**
  * 다건 처리 완료
  */
 export const completeReviewTickets = async (ticketIds: number[]): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets/complete`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ ticketIds }),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 처리 완료 실패');
-  }
+  await api.post(`${BASE}/complete`, { ticketIds });
 };
 
 /**
@@ -168,31 +120,14 @@ export const completeReviewTickets = async (ticketIds: number[]): Promise<void> 
 export const createReviewTicket = async (
   request: ReviewTicketCreateRequest
 ): Promise<ReviewTicketDetailResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 생성 실패');
-  }
-
-  return response.json();
+  const { data } = await api.post<ReviewTicketDetailResponse>(BASE, request);
+  return data;
 };
 
 /**
  * 티켓 상세 조회
  */
 export const getReviewTicketDetail = async (ticketId: number): Promise<ReviewTicketDetailResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/review-tickets/${ticketId}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('티켓 상세 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<ReviewTicketDetailResponse>(`${BASE}/${ticketId}`);
+  return data;
 };

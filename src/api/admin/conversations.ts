@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+import api from '../api';
 
 export interface AdminConversationListItem {
   conversationId: string;
@@ -35,14 +35,6 @@ export interface AdminConversationDetailResponse {
   timeline: AdminConversationMessageResponse[];
 }
 
-const getAuthHeaders = () => {
-  const token = sessionStorage.getItem('accessToken');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
-
 export interface ConversationQueryParams {
   userEmail?: string;
   from?: string;
@@ -54,49 +46,38 @@ export interface ConversationQueryParams {
   size?: number;
 }
 
+/**
+ * 대화 목록 조회. axios api 사용 → 401 시 리프레시·재시도 후 실패 시 로그인 리다이렉트.
+ */
 export const getAdminConversations = async (
   params: ConversationQueryParams
 ): Promise<AdminConversationListResponse> => {
   const searchParams = new URLSearchParams();
-
   if (params.userEmail) searchParams.set('userEmail', params.userEmail);
   if (params.from) searchParams.set('from', params.from);
   if (params.to) searchParams.set('to', params.to);
   if (params.roomKey) searchParams.set('roomKey', params.roomKey);
   if (params.intimacyLevel !== undefined) searchParams.set('intimacyLevel', String(params.intimacyLevel));
   if (params.dataSource) searchParams.set('dataSource', params.dataSource);
-
   searchParams.set('page', String(params.page ?? 0));
   searchParams.set('size', String(params.size ?? 20));
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/conversations?${searchParams}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('대화 목록 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<AdminConversationListResponse>(
+    `/api/admin/conversations?${searchParams}`
+  );
+  return data;
 };
 
+/**
+ * 대화 상세 조회. axios api 사용 → 401 시 리프레시·재시도 후 실패 시 로그인 리다이렉트.
+ */
 export const getAdminConversationDetail = async (
   conversationId: string,
   dataSource: 'chat' | 'archive' = 'chat'
 ): Promise<AdminConversationDetailResponse> => {
-  const searchParams = new URLSearchParams({ dataSource });
-  const response = await fetch(
-    `${API_BASE_URL}/api/admin/conversations/${conversationId}?${searchParams}`,
-    {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    }
+  const params = new URLSearchParams({ dataSource });
+  const { data } = await api.get<AdminConversationDetailResponse>(
+    `/api/admin/conversations/${conversationId}?${params}`
   );
-
-  if (!response.ok) {
-    throw new Error('대화 상세 조회 실패');
-  }
-
-  return response.json();
+  return data;
 };

@@ -1,8 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+import api from '../api';
 
 export interface AdminAuditLogResponse {
   id: number;
   adminUserId: string;
+  adminUserEmail?: string | null;
   actionType: string;
   targetType?: string | null;
   targetId?: number | null;
@@ -24,14 +25,6 @@ export interface AdminAuditLogListResponse {
   };
 }
 
-const getAuthHeaders = () => {
-  const token = sessionStorage.getItem('accessToken');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-};
-
 export interface AuditLogQueryParams {
   adminUserId?: string;
   actionType?: string;
@@ -41,6 +34,9 @@ export interface AuditLogQueryParams {
   size?: number;
 }
 
+/**
+ * 감사 로그 조회. axios api 사용 → 401 시 리프레시·재시도 후 실패 시 로그인 리다이렉트.
+ */
 export const getAuditLogs = async (params: AuditLogQueryParams): Promise<AdminAuditLogListResponse> => {
   const searchParams = new URLSearchParams();
   if (params.adminUserId) searchParams.set('adminUserId', params.adminUserId);
@@ -50,14 +46,6 @@ export const getAuditLogs = async (params: AuditLogQueryParams): Promise<AdminAu
   searchParams.set('page', String(params.page ?? 0));
   searchParams.set('size', String(params.size ?? 20));
 
-  const response = await fetch(`${API_BASE_URL}/api/admin/audit-logs?${searchParams}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error('감사 로그 조회 실패');
-  }
-
-  return response.json();
+  const { data } = await api.get<AdminAuditLogListResponse>(`/api/admin/audit-logs?${searchParams}`);
+  return data;
 };

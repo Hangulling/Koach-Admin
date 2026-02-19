@@ -35,7 +35,7 @@ export default function PromptsTestAndApplyPage() {
   const [testOutput, setTestOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
-  const [activePrompt, setActivePrompt] = useState<PromptActiveResponse | null>(null)
+  const [_activePrompt, setActivePrompt] = useState<PromptActiveResponse | null>(null)
   const [reviewTickets, setReviewTickets] = useState<ReviewTicketListResponse | null>(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [selectedTicketIds, setSelectedTicketIds] = useState<number[]>([])
@@ -330,11 +330,19 @@ export default function PromptsTestAndApplyPage() {
                 )}
               </select>
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end gap-2">
+              <Button
+                onClick={handleApply}
+                disabled={isLoading}
+                variant="confirm"
+                className="flex-1 h-12"
+              >
+                저장 및 적용
+              </Button>
               <Button
                 onClick={() => navigate('/prompts/versions')}
                 variant="confirm"
-                className="w-full h-12"
+                className="flex-1 h-12"
               >
                 버전 관리
               </Button>
@@ -386,9 +394,14 @@ export default function PromptsTestAndApplyPage() {
             />
           </div>
           <div className="flex gap-3 mb-4">
-            <Button onClick={handleTest} disabled={isTesting || !testInput.trim()}>
+            <button
+              type="button"
+              onClick={handleTest}
+              disabled={isTesting || !testInput.trim()}
+              className="px-5 py-2.5 rounded-lg font-medium bg-amber-500 text-gray-900 hover:bg-amber-600 focus:ring-2 focus:ring-amber-400 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
               {isTesting ? '테스트 중...' : '테스트 실행'}
-            </Button>
+            </button>
             <Button onClick={handleReset} variant="cancel">
               초기화
             </Button>
