@@ -2,10 +2,10 @@
 export interface ChatLogListResponse {
   chatroomId: string
   chatroomName: string
-  concept: string
   intimacyLevel: number
   lastMessageAt: string
   messageCount: number
+  userId: string
   userEmail: string
 }
 
@@ -73,8 +73,8 @@ export interface ChatroomOption {
 
 // 친밀도 레벨 옵션 (드롭다운용)
 export interface IntimacyLevelOption {
-  level: number
-  description: string
+  value: number
+  label: string
 }
 
 // 페이지 정보

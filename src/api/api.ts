@@ -62,6 +62,19 @@ function attachAuth(instance: AxiosInstance) {
       cfg.headers.Authorization = `Bearer ${token}`
     }
 
+    // X-User-Id 헤더 자동 추가 (관리 큐 API에서 필수)
+    try {
+      const adminUserStr = sessionStorage.getItem('adminUser')
+      if (adminUserStr) {
+        const adminUser = JSON.parse(adminUserStr)
+        if (adminUser.id) {
+          cfg.headers['X-User-Id'] = adminUser.id
+        }
+      }
+    } catch {
+      // adminUser 파싱 실패 시 무시
+    }
+
     const url = cfg.url || ''
     if (url.includes(AUTH_ENDPOINTS.REFRESH_TOKEN)) {
       dropHeader(cfg.headers, 'authorization')

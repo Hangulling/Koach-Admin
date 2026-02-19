@@ -58,7 +58,6 @@ export interface ManagementQueueCountResponse {
   intimacyCount: number
   conversationCount: number
   vocaCount: number
-  totalPendingCount: number
 }
 
 // 페이지 정보
