@@ -181,7 +181,7 @@ export default function MyManagementQueuePage() {
     try {
       await batchCompleteManagementQueue({
         ids: Array.from(selectedIds),
-        note: note ?? '',
+        note: note || '',
       })
 
       alert('처리 완료되었습니다')
@@ -402,7 +402,7 @@ export default function MyManagementQueuePage() {
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <span className="text-sm text-gray-700">
-                  전체 대기: <span className="font-semibold">{counts.totalPendingCount}</span>건
+                  전체 대기: <span className="font-semibold">{counts.intimacyCount + counts.conversationCount + counts.vocaCount}</span>건
                 </span>
               </div>
             </div>

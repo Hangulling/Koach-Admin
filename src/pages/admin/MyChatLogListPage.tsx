@@ -102,7 +102,7 @@ export default function MyChatLogListPage() {
 
   // 행 클릭 (상세 페이지로 이동)
   const handleRowClick = (chatroomId: string) => {
-    navigate(`/my/chat-logs/${chatroomId}`)
+    navigate(`/admin/chat-management/chat-logs/${chatroomId}`)
   }
 
   // 페이지 이동
@@ -190,8 +190,8 @@ export default function MyChatLogListPage() {
               >
                 <option value="">친밀도를 선택해주세요</option>
                 {intimacyOptions.map((option) => (
-                  <option key={option.level} value={option.level}>
-                    Level {option.level} - {option.description}
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -258,7 +258,7 @@ export default function MyChatLogListPage() {
                           {new Date(log.lastMessageAt).toLocaleString('ko-KR')}
                         </td>
                         <td className="py-3 px-4 text-sm">
-                          {log.chatroomName} ({log.concept})
+                          {log.chatroomName}
                         </td>
                         <td className="py-3 px-4 text-sm">Level {log.intimacyLevel}</td>
                         <td className="py-3 px-4 text-sm">{log.messageCount}</td>
