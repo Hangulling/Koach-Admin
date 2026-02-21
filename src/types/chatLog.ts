@@ -74,16 +74,15 @@ export interface ChatroomOption {
 
 // 친밀도 레벨 옵션 (드롭다운용)
 export interface IntimacyLevelOption {
-  value: number
-  label: string
+  level: number
+  description: string
 }
 
 // 페이지 정보
 export interface PageInfo {
-  number: number
-  size: number
   totalPages: number
   totalElements: number
+  numberOfElements: number
 }
 
 // 페이징된 채팅 로그 리스트

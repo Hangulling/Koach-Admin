@@ -37,9 +37,9 @@ const mockChatrooms = [
 ]
 
 const mockIntimacyLevels = [
-  { value: 1, label: 'Level 1' },
-  { value: 2, label: 'Level 2' },
-  { value: 3, label: 'Level 3' },
+  { level: 1, description: 'Level 1' },
+  { level: 2, description: 'Level 2' },
+  { level: 3, description: 'Level 3' },
 ]
 
 const mockChatLogs = [
@@ -409,7 +409,15 @@ export const handlers = [
     const url = new URL(request.url)
     const page = Number(url.searchParams.get('page') ?? 0)
     const size = Number(url.searchParams.get('size') ?? 20)
-    return HttpResponse.json(paginate(mockChatLogs, page, size))
+    const start = page * size
+    const sliced = mockChatLogs.slice(start, start + size)
+    // 실제 Spring Page 응답 구조 (flat - page 중첩 객체 없음)
+    return HttpResponse.json({
+      content: sliced,
+      totalElements: mockChatLogs.length,
+      totalPages: Math.ceil(mockChatLogs.length / size),
+      numberOfElements: sliced.length,
+    })
   }),
 
   http.get(`${API_BASE}/api/admin/chat-logs/:chatroomId/timeline`, ({ request }) => {
