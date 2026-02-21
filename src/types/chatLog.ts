@@ -2,6 +2,7 @@
 export interface ChatLogListResponse {
   chatroomId: string
   chatroomName: string
+  concept: string
   intimacyLevel: number
   lastMessageAt: string
   messageCount: number

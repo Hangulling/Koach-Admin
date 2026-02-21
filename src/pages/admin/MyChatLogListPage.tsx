@@ -17,10 +17,9 @@ import type {
 export default function MyChatLogListPage() {
   const navigate = useNavigate()
 
-  // 필터 상태
-  const [year, setYear] = useState('')
-  const [month, setMonth] = useState('')
-  const [day, setDay] = useState('')
+  // 필터 상태 (날짜: yyyy-MM-dd 문자열)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [chatroomId, setChatroomId] = useState('')
   const [intimacyLevel, setIntimacyLevel] = useState<number | ''>('')
 
@@ -34,44 +33,56 @@ export default function MyChatLogListPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // 초기 로드: 옵션 데이터
+  // 초기 로드: 옵션 조회 + 최근 7일 기본 검색
   useEffect(() => {
-    loadOptions()
+    const init = async () => {
+      // 옵션 로드
+      try {
+        const [chatrooms, intimacyLevels] = await Promise.all([
+          getChatroomOptions(),
+          getIntimacyLevelOptions(),
+        ])
+        setChatroomOptions(chatrooms)
+        setIntimacyOptions(intimacyLevels)
+      } catch (err) {
+        console.error('옵션 로드 실패:', err)
+      }
+
+      // 기본 검색: 오늘 기준 최근 7일
+      const defaultEnd = new Date().toISOString().split('T')[0]
+      const defaultStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0]
+
+      setStartDate(defaultStart)
+      setEndDate(defaultEnd)
+
+      try {
+        setIsLoading(true)
+        setError(null)
+        const result = await searchChatLogs({
+          startDate: defaultStart,
+          endDate: defaultEnd,
+          page: 0,
+          size: 20,
+        })
+        setSearchResult(result)
+        setCurrentPage(0)
+      } catch (err) {
+        console.error('초기 검색 실패:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    init()
   }, [])
 
-  // 옵션 로드
-  const loadOptions = async () => {
-    try {
-      const [chatrooms, intimacyLevels] = await Promise.all([
-        getChatroomOptions(),
-        getIntimacyLevelOptions(),
-      ])
-      setChatroomOptions(chatrooms)
-      setIntimacyOptions(intimacyLevels)
-    } catch (err) {
-      console.error('옵션 로드 실패:', err)
-    }
-  }
-
-  // 검색 실행
+  // 검색 실행 (버튼 클릭 / 페이지 이동)
   const handleSearch = async (page: number = 0) => {
-    if (!year || !month || !day) {
-      setError('년/월/일을 모두 입력해주세요')
+    if (!startDate) {
+      setError('시작일을 입력해주세요')
       return
     }
-
-    const monthNum = parseInt(month)
-    const dayNum = parseInt(day)
-    if (monthNum < 1 || monthNum > 12) {
-      setError('월은 1~12 사이여야 합니다')
-      return
-    }
-    if (dayNum < 1 || dayNum > 31) {
-      setError('일은 1~31 사이여야 합니다')
-      return
-    }
-
-    const startDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 
     try {
       setIsLoading(true)
@@ -79,6 +90,7 @@ export default function MyChatLogListPage() {
 
       const result = await searchChatLogs({
         startDate,
+        endDate: endDate || undefined,
         chatroomId: chatroomId || undefined,
         intimacyLevel: intimacyLevel === '' ? undefined : intimacyLevel,
         page,
@@ -101,14 +113,18 @@ export default function MyChatLogListPage() {
   }
 
   // 행 클릭 (상세 페이지로 이동)
-  const handleRowClick = (chatroomId: string) => {
-    navigate(`/admin/chat-management/chat-logs/${chatroomId}`)
+  const handleRowClick = (id: string) => {
+    navigate(`/admin/chat-management/chat-logs/${id}`)
   }
 
   // 페이지 이동
   const goToPage = (page: number) => {
     handleSearch(page)
   }
+
+  // concept 문자열을 보기 좋게 변환 ("HONEY" → "Honey")
+  const formatConcept = (concept: string) =>
+    concept.charAt(0).toUpperCase() + concept.slice(1).toLowerCase()
 
   return (
     <AdminLayout>
@@ -121,42 +137,26 @@ export default function MyChatLogListPage() {
 
         {/* 검색 필터 */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6">
-          <div className="grid grid-cols-5 gap-4">
-            {/* 날짜 필터 */}
+          <div className="grid grid-cols-4 gap-4">
+            {/* 시작일 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">년</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
               <input
-                type="number"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                placeholder="2025"
-                className="w-full h-11 px-3 border border-gray-300 rounded-lg"
-                min="2020"
-                max="2099"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               />
             </div>
+
+            {/* 종료일 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">월</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
               <input
-                type="number"
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                placeholder="01"
-                className="w-full h-11 px-3 border border-gray-300 rounded-lg"
-                min="1"
-                max="12"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">일</label>
-              <input
-                type="number"
-                value={day}
-                onChange={(e) => setDay(e.target.value)}
-                placeholder="20"
-                className="w-full h-11 px-3 border border-gray-300 rounded-lg"
-                min="1"
-                max="31"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               />
             </div>
 
@@ -166,12 +166,12 @@ export default function MyChatLogListPage() {
               <select
                 value={chatroomId}
                 onChange={(e) => setChatroomId(e.target.value)}
-                className="w-full h-11 px-3 border border-gray-300 rounded-lg"
+                className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               >
                 <option value="">채팅룸을 선택해주세요</option>
                 {chatroomOptions.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.name} ({option.concept})
+                    {formatConcept(option.concept)}
                   </option>
                 ))}
               </select>
@@ -186,14 +186,16 @@ export default function MyChatLogListPage() {
                   const value = e.target.value
                   setIntimacyLevel(value === '' ? '' : Number(value))
                 }}
-                className="w-full h-11 px-3 border border-gray-300 rounded-lg"
+                className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               >
                 <option value="">친밀도를 선택해주세요</option>
-                {intimacyOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                {intimacyOptions
+                  .filter((opt) => opt.value !== 2)
+                  .map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
@@ -258,7 +260,7 @@ export default function MyChatLogListPage() {
                           {new Date(log.lastMessageAt).toLocaleString('ko-KR')}
                         </td>
                         <td className="py-3 px-4 text-sm">
-                          {log.chatroomName}
+                          {log.concept ? formatConcept(log.concept) : log.chatroomName}
                         </td>
                         <td className="py-3 px-4 text-sm">Level {log.intimacyLevel}</td>
                         <td className="py-3 px-4 text-sm">{log.messageCount}</td>
