@@ -30,37 +30,48 @@ const mockAdminUser = {
 }
 
 const mockChatrooms = [
-  { id: 'room-001', name: '채팅방 A', concept: 'daily', userEmail: 'user1@test.com' },
-  { id: 'room-002', name: '채팅방 B', concept: 'travel', userEmail: 'user2@test.com' },
-  { id: 'room-003', name: '채팅방 C', concept: 'food', userEmail: 'user3@test.com' },
+  { id: 'room-001', name: '대화', concept: 'HONEY', userEmail: 'user1@test.com' },
+  { id: 'room-002', name: '대화', concept: 'FRIEND', userEmail: 'user2@test.com' },
+  { id: 'room-003', name: '대화', concept: 'COWORKER', userEmail: 'user3@test.com' },
+  { id: 'room-004', name: '대화', concept: 'SENIOR', userEmail: 'user4@test.com' },
 ]
 
 const mockIntimacyLevels = [
-  { value: 1, label: '1단계 - 존댓말' },
-  { value: 2, label: '2단계 - 격식체' },
-  { value: 3, label: '3단계 - 반말' },
-  { value: 4, label: '4단계 - 친한 반말' },
-  { value: 5, label: '5단계 - 매우 친밀' },
+  { value: 1, label: 'Level 1' },
+  { value: 2, label: 'Level 2' },
+  { value: 3, label: 'Level 3' },
 ]
 
 const mockChatLogs = [
   {
     chatroomId: 'room-001',
-    chatroomName: '채팅방 A',
+    chatroomName: '대화',
+    concept: 'HONEY',
     intimacyLevel: 3,
-    lastMessageAt: '2025-06-01T12:30:00',
+    lastMessageAt: '2026-02-21T12:30:00',
     messageCount: 42,
     userId: 'user-001',
     userEmail: 'user1@test.com',
   },
   {
     chatroomId: 'room-002',
-    chatroomName: '채팅방 B',
+    chatroomName: '대화',
+    concept: 'FRIEND',
     intimacyLevel: 1,
-    lastMessageAt: '2025-06-01T11:00:00',
+    lastMessageAt: '2026-02-21T11:00:00',
     messageCount: 15,
     userId: 'user-002',
     userEmail: 'user2@test.com',
+  },
+  {
+    chatroomId: 'room-003',
+    chatroomName: '대화',
+    concept: 'COWORKER',
+    intimacyLevel: 3,
+    lastMessageAt: '2026-02-20T09:15:00',
+    messageCount: 28,
+    userId: 'user-003',
+    userEmail: 'user3@test.com',
   },
 ]
 
@@ -71,7 +82,7 @@ const mockTimeline = [
     senderType: 'USER',
     sequenceNumber: 1,
     turnNumber: 1,
-    sourceCreatedAt: '2025-06-01T10:00:00',
+    sourceCreatedAt: '2026-02-21T10:00:00',
     tokenCount: 12,
     processingTimeMs: 150,
     agentResults: {
@@ -95,7 +106,7 @@ const mockTimeline = [
     senderType: 'CHATBOT',
     sequenceNumber: 2,
     turnNumber: 1,
-    sourceCreatedAt: '2025-06-01T10:00:02',
+    sourceCreatedAt: '2026-02-21T10:00:02',
   },
   {
     messageId: 'msg-003',
@@ -103,7 +114,31 @@ const mockTimeline = [
     senderType: 'USER',
     sequenceNumber: 3,
     turnNumber: 2,
-    sourceCreatedAt: '2025-06-01T10:01:00',
+    sourceCreatedAt: '2026-02-21T10:01:00',
+    tokenCount: 8,
+    processingTimeMs: 120,
+    agentResults: {
+      intimacy: {
+        detectedLevel: 1,
+        correctedSentence: '좋아요! 공원에 가고 싶어요.',
+        corrections: '반말 → 존댓말 교정',
+        feedback: { ko: '격식체를 사용해보세요', en: 'Try formal speech' },
+      },
+      conversation: { content: '네, 공원 산책은 정말 기분 좋은 활동이죠!' },
+      vocabulary: {
+        words: [
+          { word: '공원', difficulty: 1, context: '공원에 가고 싶어' },
+        ],
+      },
+    },
+  },
+  {
+    messageId: 'msg-004',
+    content: '네, 공원 산책은 정말 기분 좋은 활동이죠!',
+    senderType: 'CHATBOT',
+    sequenceNumber: 4,
+    turnNumber: 2,
+    sourceCreatedAt: '2026-02-21T10:01:05',
   },
 ]
 
