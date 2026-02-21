@@ -3,123 +3,149 @@ import { useNavigate } from 'react-router-dom'
 import AdminLayout from '../../components/admin/AdminLayout'
 import Button from '../../components/common/Button'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
-import {
-  getChatroomOptions,
-  getIntimacyLevelOptions,
-  searchChatLogs,
-} from '../../api/admin/myChatLogs'
+import api from '../../api/api'
 import type {
   ChatroomOption,
   IntimacyLevelOption,
-  ChatLogListPageResponse,
+  ChatLogListResponse,
+  PageInfo,
 } from '../../types/chatLog'
 
 export default function MyChatLogListPage() {
   const navigate = useNavigate()
 
-  // 필터 상태 (날짜: yyyy-MM-dd 문자열)
+  // 날짜 필터
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
-  const [chatroomId, setChatroomId] = useState('')
-  const [intimacyLevel, setIntimacyLevel] = useState<number | ''>('')
+
+  // 선택 필터
+  const [selectedChatroomId, setSelectedChatroomId] = useState('')
+  const [selectedIntimacyLevel, setSelectedIntimacyLevel] = useState('')
 
   // 옵션 데이터
   const [chatroomOptions, setChatroomOptions] = useState<ChatroomOption[]>([])
   const [intimacyOptions, setIntimacyOptions] = useState<IntimacyLevelOption[]>([])
 
   // 검색 결과
-  const [searchResult, setSearchResult] = useState<ChatLogListPageResponse | null>(null)
+  const [chatLogs, setChatLogs] = useState<ChatLogListResponse[]>([])
+  const [pageInfo, setPageInfo] = useState<PageInfo | null>(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // 초기 로드: 옵션 조회 + 최근 7일 기본 검색
   useEffect(() => {
-    const init = async () => {
-      // 옵션 로드
+    const loadOptions = async () => {
       try {
-        const [chatrooms, intimacyLevels] = await Promise.all([
-          getChatroomOptions(),
-          getIntimacyLevelOptions(),
-        ])
-        setChatroomOptions(chatrooms)
-        setIntimacyOptions(intimacyLevels)
+        // 1. 채팅룸 옵션 조회
+        const chatroomRes = await api.get<ChatroomOption[]>('/api/admin/chat-logs/chatrooms')
+        setChatroomOptions(chatroomRes.data)
+        console.log('✅ 채팅룸 옵션:', chatroomRes.data)
+
+        // 2. 친밀도 옵션 조회
+        const intimacyRes = await api.get<IntimacyLevelOption[]>('/api/admin/chat-logs/intimacy-levels')
+        setIntimacyOptions(intimacyRes.data)
+        console.log('✅ 친밀도 옵션:', intimacyRes.data)
+
+        // 3. 최근 7일 기본 검색
+        const defaultEnd = new Date().toISOString().split('T')[0]
+        const defaultStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0]
+
+        setStartDate(defaultStart)
+        setEndDate(defaultEnd)
+
+        // 4. 검색 실행
+        await runSearch({ startDate: defaultStart, endDate: defaultEnd, page: 0 })
       } catch (err) {
-        console.error('옵션 로드 실패:', err)
-      }
-
-      // 기본 검색: 오늘 기준 최근 7일
-      const defaultEnd = new Date().toISOString().split('T')[0]
-      const defaultStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0]
-
-      setStartDate(defaultStart)
-      setEndDate(defaultEnd)
-
-      try {
-        setIsLoading(true)
-        setError(null)
-        const result = await searchChatLogs({
-          startDate: defaultStart,
-          endDate: defaultEnd,
-          page: 0,
-          size: 20,
-        })
-        setSearchResult(result)
-        setCurrentPage(0)
-      } catch (err) {
-        console.error('초기 검색 실패:', err)
-      } finally {
-        setIsLoading(false)
+        console.error('❌ 옵션 로딩 실패:', err)
       }
     }
-    init()
+
+    loadOptions()
   }, [])
 
-  // 검색 실행 (버튼 클릭 / 페이지 이동)
-  const handleSearch = async (page: number = 0) => {
-    if (!startDate) {
+  // 실제 검색 실행 (파라미터 직접 전달)
+  const runSearch = async (params: {
+    startDate: string
+    endDate?: string
+    chatroomId?: string
+    intimacyLevel?: number
+    page?: number
+    size?: number
+  }) => {
+    if (!params.startDate) {
       setError('시작일을 입력해주세요')
       return
     }
+
+    const searchParams: Record<string, string | number> = {
+      startDate: params.startDate,
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+    }
+    if (params.endDate) searchParams.endDate = params.endDate
+    if (params.chatroomId) searchParams.chatroomId = params.chatroomId
+    if (params.intimacyLevel !== undefined) searchParams.intimacyLevel = params.intimacyLevel
+
+    console.log('🔍 검색 파라미터:', searchParams)
 
     try {
       setIsLoading(true)
       setError(null)
 
-      const result = await searchChatLogs({
-        startDate,
-        endDate: endDate || undefined,
-        chatroomId: chatroomId || undefined,
-        intimacyLevel: intimacyLevel === '' ? undefined : intimacyLevel,
-        page,
-        size: 20,
-      })
+      const response = await api.get<{
+        content: ChatLogListResponse[]
+        totalPages: number
+        totalElements: number
+        numberOfElements: number
+      }>(
+        '/api/admin/chat-logs/search',
+        { params: searchParams }
+      )
 
-      setSearchResult(result)
-      setCurrentPage(page)
+      console.log('✅ 검색 결과:', response.data)
+      setChatLogs(response.data.content || [])
+      setPageInfo({
+        totalPages: response.data.totalPages,
+        totalElements: response.data.totalElements,
+        numberOfElements: response.data.numberOfElements,
+      })
+      setCurrentPage(params.page ?? 0)
     } catch (err) {
-      console.error('검색 실패:', err)
+      console.error('❌ 검색 실패:', err)
       setError('검색에 실패했습니다')
     } finally {
       setIsLoading(false)
     }
   }
 
-  // 조회하기 버튼
+  // 조회하기 버튼: 현재 상태 값으로 검색
   const handleSearchClick = () => {
-    handleSearch(0)
+    runSearch({
+      startDate,
+      endDate: endDate || undefined,
+      chatroomId: selectedChatroomId || undefined,
+      intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
+      page: 0,
+    })
+  }
+
+  // 페이지 이동
+  const goToPage = (page: number) => {
+    runSearch({
+      startDate,
+      endDate: endDate || undefined,
+      chatroomId: selectedChatroomId || undefined,
+      intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
+      page,
+    })
   }
 
   // 행 클릭 (상세 페이지로 이동)
   const handleRowClick = (id: string) => {
     navigate(`/admin/chat-management/chat-logs/${id}`)
-  }
-
-  // 페이지 이동
-  const goToPage = (page: number) => {
-    handleSearch(page)
   }
 
   // concept 문자열을 보기 좋게 변환 ("HONEY" → "Honey")
@@ -164,8 +190,8 @@ export default function MyChatLogListPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">채팅룸</label>
               <select
-                value={chatroomId}
-                onChange={(e) => setChatroomId(e.target.value)}
+                value={selectedChatroomId}
+                onChange={(e) => setSelectedChatroomId(e.target.value)}
                 className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               >
                 <option value="">채팅룸을 선택해주세요</option>
@@ -181,19 +207,16 @@ export default function MyChatLogListPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">친밀도</label>
               <select
-                value={intimacyLevel}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setIntimacyLevel(value === '' ? '' : Number(value))
-                }}
+                value={selectedIntimacyLevel}
+                onChange={(e) => setSelectedIntimacyLevel(e.target.value)}
                 className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               >
                 <option value="">친밀도를 선택해주세요</option>
                 {intimacyOptions
-                  .filter((opt) => opt.value !== 2)
+                  .filter((opt) => opt.level !== 2)
                   .map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                    <option key={option.level} value={option.level}>
+                      {option.description}
                     </option>
                   ))}
               </select>
@@ -202,9 +225,7 @@ export default function MyChatLogListPage() {
 
           {/* 에러 메시지 */}
           {error && (
-            <div className="mt-4 text-red-600 text-sm">
-              {error}
-            </div>
+            <div className="mt-4 text-red-600 text-sm">{error}</div>
           )}
 
           {/* 조회하기 버튼 */}
@@ -221,7 +242,7 @@ export default function MyChatLogListPage() {
 
           {isLoading ? (
             <LoadingSpinner message="검색 중..." />
-          ) : searchResult && searchResult.content.length > 0 ? (
+          ) : chatLogs.length > 0 ? (
             <>
               {/* 결과 테이블 */}
               <div className="overflow-x-auto">
@@ -249,7 +270,7 @@ export default function MyChatLogListPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {searchResult.content.map((log) => (
+                    {chatLogs.map((log) => (
                       <tr
                         key={log.chatroomId}
                         className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
@@ -274,34 +295,33 @@ export default function MyChatLogListPage() {
               </div>
 
               {/* 페이지네이션 */}
-              <div className="mt-4 flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                  {currentPage + 1} / {searchResult.page.totalPages} 페이지 (총{' '}
-                  {searchResult.page.totalElements}건)
+              {pageInfo && (
+                <div className="mt-4 flex justify-between items-center">
+                  <div className="text-sm text-gray-600">
+                    {currentPage + 1} / {pageInfo.totalPages} 페이지 (총 {pageInfo.totalElements}건)
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 0}
+                      variant="cancel"
+                    >
+                      이전
+                    </Button>
+                    <Button
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage >= pageInfo.totalPages - 1}
+                      variant="cancel"
+                    >
+                      다음
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 0}
-                    variant="cancel"
-                  >
-                    이전
-                  </Button>
-                  <Button
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage >= searchResult.page.totalPages - 1}
-                    variant="cancel"
-                  >
-                    다음
-                  </Button>
-                </div>
-              </div>
+              )}
             </>
-          ) : searchResult ? (
-            <div className="text-center py-8 text-gray-500">검색 결과가 없습니다.</div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              검색 조건을 입력하고 조회하기 버튼을 클릭하세요.
+              {error ? '' : '검색 결과가 없습니다.'}
             </div>
           )}
         </div>
