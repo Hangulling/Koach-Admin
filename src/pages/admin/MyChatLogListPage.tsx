@@ -5,7 +5,6 @@ import Button from '../../components/common/Button'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import api from '../../api/api'
 import type {
-  ChatroomOption,
   IntimacyLevelOption,
   ChatLogListResponse,
   PageInfo,
@@ -19,11 +18,10 @@ export default function MyChatLogListPage() {
   const [endDate, setEndDate] = useState('')
 
   // 선택 필터
-  const [selectedChatroomId, setSelectedChatroomId] = useState('')
+  const [selectedConcept, setSelectedConcept] = useState('')
   const [selectedIntimacyLevel, setSelectedIntimacyLevel] = useState('')
 
   // 옵션 데이터
-  const [chatroomOptions, setChatroomOptions] = useState<ChatroomOption[]>([])
   const [intimacyOptions, setIntimacyOptions] = useState<IntimacyLevelOption[]>([])
 
   // 검색 결과
@@ -37,12 +35,7 @@ export default function MyChatLogListPage() {
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        // 1. 채팅룸 옵션 조회
-        const chatroomRes = await api.get<ChatroomOption[]>('/api/admin/chat-logs/chatrooms')
-        setChatroomOptions(chatroomRes.data)
-        console.log('✅ 채팅룸 옵션:', chatroomRes.data)
-
-        // 2. 친밀도 옵션 조회
+        // 1. 친밀도 옵션 조회
         const intimacyRes = await api.get<IntimacyLevelOption[]>('/api/admin/chat-logs/intimacy-levels')
         setIntimacyOptions(intimacyRes.data)
         console.log('✅ 친밀도 옵션:', intimacyRes.data)
@@ -70,7 +63,7 @@ export default function MyChatLogListPage() {
   const runSearch = async (params: {
     startDate: string
     endDate?: string
-    chatroomId?: string
+    concept?: string
     intimacyLevel?: number
     page?: number
     size?: number
@@ -86,7 +79,7 @@ export default function MyChatLogListPage() {
       size: params.size ?? 20,
     }
     if (params.endDate) searchParams.endDate = params.endDate
-    if (params.chatroomId) searchParams.chatroomId = params.chatroomId
+    if (params.concept) searchParams.concept = params.concept
     if (params.intimacyLevel !== undefined) searchParams.intimacyLevel = params.intimacyLevel
 
     console.log('🔍 검색 파라미터:', searchParams)
@@ -126,7 +119,7 @@ export default function MyChatLogListPage() {
     runSearch({
       startDate,
       endDate: endDate || undefined,
-      chatroomId: selectedChatroomId || undefined,
+      concept: selectedConcept || undefined,
       intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
       page: 0,
     })
@@ -137,7 +130,7 @@ export default function MyChatLogListPage() {
     runSearch({
       startDate,
       endDate: endDate || undefined,
-      chatroomId: selectedChatroomId || undefined,
+      concept: selectedConcept || undefined,
       intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
       page,
     })
@@ -190,16 +183,15 @@ export default function MyChatLogListPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">채팅룸</label>
               <select
-                value={selectedChatroomId}
-                onChange={(e) => setSelectedChatroomId(e.target.value)}
+                value={selectedConcept}
+                onChange={(e) => setSelectedConcept(e.target.value)}
                 className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               >
                 <option value="">채팅룸을 선택해주세요</option>
-                {chatroomOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {formatConcept(option.concept)}
-                  </option>
-                ))}
+                <option value="HONEY">Honey</option>
+                <option value="FRIEND">Friend</option>
+                <option value="COWORKER">Coworker</option>
+                <option value="SENIOR">Senior</option>
               </select>
             </div>
 

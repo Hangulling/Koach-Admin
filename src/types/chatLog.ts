@@ -94,5 +94,7 @@ export interface ChatLogListPageResponse {
 // 페이징된 메시지 타임라인
 export interface MessageTimelinePageResponse {
   content: MessageTimelineResponse[]
-  page: PageInfo
+  totalPages: number
+  totalElements: number
+  numberOfElements: number
 }

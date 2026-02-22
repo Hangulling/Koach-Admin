@@ -276,8 +276,8 @@ export default function MyChatLogDetailPage() {
                 {/* 페이지네이션 */}
                 <div className="mt-4 flex justify-between items-center">
                   <div className="text-sm text-gray-600">
-                    {currentPage + 1} / {timeline.page.totalPages} 페이지 (총{' '}
-                    {timeline.page.totalElements}건)
+                    {currentPage + 1} / {timeline.totalPages} 페이지 (총{' '}
+                    {timeline.totalElements}건)
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -289,7 +289,7 @@ export default function MyChatLogDetailPage() {
                     </Button>
                     <Button
                       onClick={() => loadTimeline(currentPage + 1)}
-                      disabled={currentPage >= timeline.page.totalPages - 1}
+                      disabled={currentPage >= timeline.totalPages - 1}
                       variant="cancel"
                     >
                       다음
