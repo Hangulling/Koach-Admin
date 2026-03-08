@@ -20,6 +20,7 @@ export default function MyChatLogListPage() {
   // 선택 필터
   const [selectedConcept, setSelectedConcept] = useState('')
   const [selectedIntimacyLevel, setSelectedIntimacyLevel] = useState('')
+  const [dataSource, setDataSource] = useState('archive')
 
   // 옵션 데이터
   const [intimacyOptions, setIntimacyOptions] = useState<IntimacyLevelOption[]>([])
@@ -50,7 +51,7 @@ export default function MyChatLogListPage() {
         setEndDate(defaultEnd)
 
         // 4. 검색 실행
-        await runSearch({ startDate: defaultStart, endDate: defaultEnd, page: 0 })
+        await runSearch({ startDate: defaultStart, endDate: defaultEnd, page: 0, dataSource: 'archive' })
       } catch (err) {
         console.error('❌ 옵션 로딩 실패:', err)
       }
@@ -67,6 +68,7 @@ export default function MyChatLogListPage() {
     intimacyLevel?: number
     page?: number
     size?: number
+    dataSource?: string
   }) => {
     if (!params.startDate) {
       setError('시작일을 입력해주세요')
@@ -77,6 +79,7 @@ export default function MyChatLogListPage() {
       startDate: params.startDate,
       page: params.page ?? 0,
       size: params.size ?? 20,
+      dataSource: params.dataSource ?? 'archive',
     }
     if (params.endDate) searchParams.endDate = params.endDate
     if (params.concept) searchParams.concept = params.concept
@@ -122,6 +125,7 @@ export default function MyChatLogListPage() {
       concept: selectedConcept || undefined,
       intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
       page: 0,
+      dataSource,
     })
   }
 
@@ -133,6 +137,7 @@ export default function MyChatLogListPage() {
       concept: selectedConcept || undefined,
       intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
       page,
+      dataSource,
     })
   }
 
@@ -156,7 +161,20 @@ export default function MyChatLogListPage() {
 
         {/* 검색 필터 */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
+            {/* 데이터 소스 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">데이터 소스</label>
+              <select
+                value={dataSource}
+                onChange={(e) => setDataSource(e.target.value)}
+                className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+              >
+                <option value="archive">보관(archive)</option>
+                <option value="chat">운영(chat)</option>
+              </select>
+            </div>
+
             {/* 시작일 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
