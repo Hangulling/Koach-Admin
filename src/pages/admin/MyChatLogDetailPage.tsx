@@ -142,11 +142,11 @@ export default function MyChatLogDetailPage() {
             {message.agentResults && (
               <div className="mt-3 space-y-2">
                 {/* Intimacy */}
-                {message.agentResults.intimacy && (
-                  <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
-                    <div className="text-xs font-medium text-yellow-800 mb-1">
-                      intimacy
-                    </div>
+                <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
+                  <div className="text-xs font-medium text-yellow-800 mb-1">
+                    intimacy
+                  </div>
+                  {message.agentResults.intimacy ? (
                     <div className="text-sm space-y-1">
                       <div>
                         <span className="text-gray-600">감지 레벨:</span> Level{' '}
@@ -163,43 +163,49 @@ export default function MyChatLogDetailPage() {
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-sm text-gray-500">없음</div>
+                  )}
+                </div>
 
                 {/* Conversation */}
-                {message.agentResults.conversation && (
-                  <div className="bg-purple-50 p-3 rounded border border-purple-200">
-                    <div className="text-xs font-medium text-purple-800 mb-1">
-                      conversation
-                    </div>
+                <div className="bg-purple-50 p-3 rounded border border-purple-200">
+                  <div className="text-xs font-medium text-purple-800 mb-1">
+                    conversation
+                  </div>
+                  {message.agentResults.conversation ? (
                     <div className="text-sm">
                       {message.agentResults.conversation.content}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-sm text-gray-500">없음</div>
+                  )}
+                </div>
 
                 {/* Vocabulary */}
-                {message.agentResults.vocabulary &&
-                  message.agentResults.vocabulary.words.length > 0 && (
-                    <div className="bg-pink-50 p-3 rounded border border-pink-200">
-                      <div className="text-xs font-medium text-pink-800 mb-1">
-                        vocabulary
-                      </div>
-                      <div className="space-y-2">
-                        {message.agentResults.vocabulary.words.map((word, idx) => (
-                          <div key={idx} className="text-sm">
-                            <span className="font-medium">{word.word}</span>
-                            <span className="text-gray-600 ml-2">
-                              (난이도: {word.difficulty})
-                            </span>
-                            <div className="text-gray-600 text-xs mt-1">
-                              {word.context}
-                            </div>
+                <div className="bg-pink-50 p-3 rounded border border-pink-200">
+                  <div className="text-xs font-medium text-pink-800 mb-1">
+                    vocabulary
+                  </div>
+                  {message.agentResults.vocabulary &&
+                  message.agentResults.vocabulary.words.length > 0 ? (
+                    <div className="space-y-2">
+                      {message.agentResults.vocabulary.words.map((word, idx) => (
+                        <div key={idx} className="text-sm">
+                          <span className="font-medium">{word.word}</span>
+                          <span className="text-gray-600 ml-2">
+                            (난이도: {word.difficulty})
+                          </span>
+                          <div className="text-gray-600 text-xs mt-1">
+                            {word.context}
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">없음</div>
                   )}
+                </div>
               </div>
             )}
 
@@ -276,8 +282,8 @@ export default function MyChatLogDetailPage() {
                 {/* 페이지네이션 */}
                 <div className="mt-4 flex justify-between items-center">
                   <div className="text-sm text-gray-600">
-                    {currentPage + 1} / {timeline.page.totalPages} 페이지 (총{' '}
-                    {timeline.page.totalElements}건)
+                    {currentPage + 1} / {timeline.totalPages} 페이지 (총{' '}
+                    {timeline.totalElements}건)
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -289,7 +295,7 @@ export default function MyChatLogDetailPage() {
                     </Button>
                     <Button
                       onClick={() => loadTimeline(currentPage + 1)}
-                      disabled={currentPage >= timeline.page.totalPages - 1}
+                      disabled={currentPage >= timeline.totalPages - 1}
                       variant="cancel"
                     >
                       다음

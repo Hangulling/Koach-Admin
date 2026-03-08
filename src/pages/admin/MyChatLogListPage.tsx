@@ -5,7 +5,6 @@ import Button from '../../components/common/Button'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import api from '../../api/api'
 import type {
-  ChatroomOption,
   IntimacyLevelOption,
   ChatLogListResponse,
   PageInfo,
@@ -19,11 +18,11 @@ export default function MyChatLogListPage() {
   const [endDate, setEndDate] = useState('')
 
   // 선택 필터
-  const [selectedChatroomId, setSelectedChatroomId] = useState('')
+  const [selectedConcept, setSelectedConcept] = useState('')
   const [selectedIntimacyLevel, setSelectedIntimacyLevel] = useState('')
+  const [dataSource, setDataSource] = useState('archive')
 
   // 옵션 데이터
-  const [chatroomOptions, setChatroomOptions] = useState<ChatroomOption[]>([])
   const [intimacyOptions, setIntimacyOptions] = useState<IntimacyLevelOption[]>([])
 
   // 검색 결과
@@ -37,12 +36,7 @@ export default function MyChatLogListPage() {
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        // 1. 채팅룸 옵션 조회
-        const chatroomRes = await api.get<ChatroomOption[]>('/api/admin/chat-logs/chatrooms')
-        setChatroomOptions(chatroomRes.data)
-        console.log('✅ 채팅룸 옵션:', chatroomRes.data)
-
-        // 2. 친밀도 옵션 조회
+        // 1. 친밀도 옵션 조회
         const intimacyRes = await api.get<IntimacyLevelOption[]>('/api/admin/chat-logs/intimacy-levels')
         setIntimacyOptions(intimacyRes.data)
         console.log('✅ 친밀도 옵션:', intimacyRes.data)
@@ -57,7 +51,7 @@ export default function MyChatLogListPage() {
         setEndDate(defaultEnd)
 
         // 4. 검색 실행
-        await runSearch({ startDate: defaultStart, endDate: defaultEnd, page: 0 })
+        await runSearch({ startDate: defaultStart, endDate: defaultEnd, page: 0, dataSource: 'archive' })
       } catch (err) {
         console.error('❌ 옵션 로딩 실패:', err)
       }
@@ -70,10 +64,11 @@ export default function MyChatLogListPage() {
   const runSearch = async (params: {
     startDate: string
     endDate?: string
-    chatroomId?: string
+    concept?: string
     intimacyLevel?: number
     page?: number
     size?: number
+    dataSource?: string
   }) => {
     if (!params.startDate) {
       setError('시작일을 입력해주세요')
@@ -84,9 +79,10 @@ export default function MyChatLogListPage() {
       startDate: params.startDate,
       page: params.page ?? 0,
       size: params.size ?? 20,
+      dataSource: params.dataSource ?? 'archive',
     }
     if (params.endDate) searchParams.endDate = params.endDate
-    if (params.chatroomId) searchParams.chatroomId = params.chatroomId
+    if (params.concept) searchParams.concept = params.concept
     if (params.intimacyLevel !== undefined) searchParams.intimacyLevel = params.intimacyLevel
 
     console.log('🔍 검색 파라미터:', searchParams)
@@ -126,9 +122,10 @@ export default function MyChatLogListPage() {
     runSearch({
       startDate,
       endDate: endDate || undefined,
-      chatroomId: selectedChatroomId || undefined,
+      concept: selectedConcept || undefined,
       intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
       page: 0,
+      dataSource,
     })
   }
 
@@ -137,9 +134,10 @@ export default function MyChatLogListPage() {
     runSearch({
       startDate,
       endDate: endDate || undefined,
-      chatroomId: selectedChatroomId || undefined,
+      concept: selectedConcept || undefined,
       intimacyLevel: selectedIntimacyLevel ? Number(selectedIntimacyLevel) : undefined,
       page,
+      dataSource,
     })
   }
 
@@ -163,7 +161,20 @@ export default function MyChatLogListPage() {
 
         {/* 검색 필터 */}
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
+            {/* 데이터 소스 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">데이터 소스</label>
+              <select
+                value={dataSource}
+                onChange={(e) => setDataSource(e.target.value)}
+                className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+              >
+                <option value="archive">보관(archive)</option>
+                <option value="chat">운영(chat)</option>
+              </select>
+            </div>
+
             {/* 시작일 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
@@ -190,16 +201,15 @@ export default function MyChatLogListPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">채팅룸</label>
               <select
-                value={selectedChatroomId}
-                onChange={(e) => setSelectedChatroomId(e.target.value)}
+                value={selectedConcept}
+                onChange={(e) => setSelectedConcept(e.target.value)}
                 className="w-full h-11 px-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               >
                 <option value="">채팅룸을 선택해주세요</option>
-                {chatroomOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {formatConcept(option.concept)}
-                  </option>
-                ))}
+                <option value="HONEY">Honey</option>
+                <option value="FRIEND">Friend</option>
+                <option value="COWORKER">Coworker</option>
+                <option value="SENIOR">Senior</option>
               </select>
             </div>
 

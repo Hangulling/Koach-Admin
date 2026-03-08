@@ -424,7 +424,14 @@ export const handlers = [
     const url = new URL(request.url)
     const page = Number(url.searchParams.get('page') ?? 0)
     const size = Number(url.searchParams.get('size') ?? 50)
-    return HttpResponse.json(paginate(mockTimeline, page, size))
+    const start = page * size
+    const content = mockTimeline.slice(start, start + size)
+    return HttpResponse.json({
+      content,
+      totalPages: Math.ceil(mockTimeline.length / size),
+      totalElements: mockTimeline.length,
+      numberOfElements: content.length,
+    })
   }),
 
   // ─── Management Queue ──────────────────────────────────
