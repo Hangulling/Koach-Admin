@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAdminUser } from '../../hooks/useAdminUser'
 import { adminLogout } from '../../api/admin/auth'
+import Button from '../common/Button'
+
+type AdminSidebarProps = {
+  onClose?: () => void
+}
 
 type MenuItem = {
   label: string
@@ -39,13 +44,18 @@ const menuSections: MenuSection[] = [
   },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onClose }: AdminSidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAdminUser()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(['채팅 내역 관리']) // 기본으로 첫 번째 섹션 펼침
   )
+
+const handleMenuClick = (path: string) => {
+    navigate(path)
+    if (onClose) onClose()
+  }
 
   // 사용자 정보 (인증된 사용자 또는 로딩 중)
   const userName = user?.name || '로딩 중...'
@@ -98,22 +108,24 @@ export default function AdminSidebar() {
   return (
     <div className="w-72 h-screen bg-white border-r border-gray-200 flex flex-col shadow-sm">
       {/* 헤더 */}
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
-        <h1 className="text-2xl font-bold text-gray-800">Koach Admin</h1>
+      <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50">
+        <h1 className="text-2xl text-title">Koach Admin</h1>
+				<button onClick={onClose} className="lg:hidden text-gray-400">✕</button>
       </div>
 
       {/* 사용자 정보 */}
       <div className="p-6 border-b border-gray-200">
         <div className="mb-4">
-          <p className="text-base font-semibold text-gray-800 mb-1">{userName}님</p>
+          <p className="font-semibold mb-1">{userName}님</p>
           <p className="text-sm text-gray-500">관리자 ID: {adminId}</p>
         </div>
-        <button
+        <Button
           onClick={handleLogout}
-          className="w-full py-3 px-4 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+					variant='confirm'
+					size='confirm'
         >
           로그아웃
-        </button>
+        </Button>
       </div>
 
       {/* 메뉴 */}
@@ -138,10 +150,11 @@ export default function AdminSidebar() {
                     return (
                       <button
                         key={item.path}
-                        onClick={() => navigate(item.path)}
+                        // navigate(item.path) 대신 handleMenuClick 호출
+                        onClick={() => handleMenuClick(item.path)}
                         className={`w-full px-8 py-3 text-left text-base transition-colors ${
                           active
-                            ? 'bg-blue-600 text-white font-medium'
+                            ? 'bg-primary-300 text-white font-medium'
                             : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >

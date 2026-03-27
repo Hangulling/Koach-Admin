@@ -64,14 +64,14 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-10">
+    <div className="flex flex-col items-center justify-center h-full px-4 bg-linear-to-br from-gray-50 to-gray-100">
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg px-6 py-10 md:px-10 lg:px-10">
         <div className="flex flex-col justify-center items-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-800 mb-3">Koach Admin</h1>
-          <span className="text-gray-600 text-base">관리자 로그인</span>
+          <h1 className="text-3xl text-title mb-3">Koach Admin</h1>
+          <span className="text-gray-600">관리자 로그인</span>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div>
             <Input
               type="email"
@@ -96,21 +96,22 @@ export default function AdminLoginPage() {
           </div>
 
           {error && (
-            <div className="mt-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <span className="text-base text-red-600">{error}</span>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <span className="text-red-600">{error}</span>
             </div>
           )}
+				</div>
 
           <Button
-            variant="primary"
-            size="xl"
-            className="bg-blue-600 hover:bg-blue-700 my-6 w-full py-4 text-base font-semibold rounded-lg shadow-sm"
+            variant="confirm"
+            size="confirm"
+						className='mt-8'
             onClick={handleLogin}
             disabled={loading}
           >
             {loading ? '로그인 중...' : '로그인'}
           </Button>
-        </div>
+        
       </div>
     </div>
   )
