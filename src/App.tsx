@@ -21,7 +21,7 @@ function App() {
   }, [])
 
   return (
-    <div className="relative flex flex-col h-screen w-full bg-white">
+    <div className="relative flex flex-col h-dvh mx-auto w-full max-w-app md:max-w-tablet lg:max-w-desktop bg-white">
       <Toaster position="top-right" />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes />

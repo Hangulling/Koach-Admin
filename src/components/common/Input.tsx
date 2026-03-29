@@ -13,6 +13,7 @@ interface InputProps {
   readOnly?: boolean
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+	onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
@@ -29,14 +30,22 @@ export default function Input({
   inputMode,
   readOnly,
   onChange,
+	onFocus,
   onBlur,
   onKeyDown,
 }: InputProps) {
   const [show, setShow] = useState<boolean>(false)
+	const [isFocused, setIsFocused] = useState(false)
+
   const isPassword = type === 'password'
+
+	 const borderColor = isFocused
+      ? 'border-primary-200'
+        : 'border-gray-100'
+
   const VARIANTS = {
-    primary: 'flex border rounded-lg border-gray-200 px-4 py-3 my-2 bg-white',
-    error: 'flex border rounded-lg border-orange-300 px-4 py-3 my-2 bg-white',
+    primary: 'flex border rounded-lg border-gray-200 px-4 bg-white',
+    error: 'flex border rounded-lg border-orange-300 px-4 bg-white',
   } as const
 
   const SIZES = {
@@ -45,26 +54,37 @@ export default function Input({
     lg: 'w-full h-14',
   }
 
+ const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false)
+    onBlur?.(e)
+  }
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true)
+    onFocus?.(e)
+  }
+
+
   return (
     <div className="flex flex-col">
       {label && (
         <label
           htmlFor={id}
-          className="whitespace-nowrap text-gray-800 text-base text-subtitle my-2"
+          className="whitespace-nowrap text-subtitle my-2"
         >
           {label}
         </label>
       )}
-      <div className={`${VARIANTS[variant]} ${SIZES[size]} `}>
+      <div className={`${VARIANTS[variant]} ${SIZES[size]} ${borderColor} transition-colors`}>
         <input
           type={isPassword ? (show ? 'text' : 'password') : type}
           id={id}
           name={name}
           placeholder={placeholder}
-          className="outline-none w-full text-base text-body "
+          className="outline-none w-full"
           value={value}
           onChange={onChange}
-          onBlur={onBlur}
+					onFocus={handleFocus}
+          onBlur={handleBlur}
           onKeyDown={onKeyDown}
           inputMode={inputMode}
           readOnly={readOnly}
