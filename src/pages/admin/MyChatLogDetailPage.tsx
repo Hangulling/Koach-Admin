@@ -87,7 +87,7 @@ export default function MyChatLogDetailPage() {
 
   // 타입별 렌더링
   const renderMessage = (message: MessageTimelineResponse) => {
-    const isUser = message.senderType === 'USER'
+    const isUser = message.senderType?.toUpperCase() === 'USER'
     const isSelected = selectedMessageIds.has(message.messageId)
 
     return (
@@ -121,9 +121,9 @@ export default function MyChatLogDetailPage() {
           <div className="w-24 flex-shrink-0">
             <span
               className={`inline-block px-2 py-1 text-xs rounded ${
-                message.senderType === 'USER'
+                message.senderType?.toUpperCase() === 'USER'
                   ? 'bg-blue-100 text-blue-800'
-                  : message.senderType === 'CHATBOT'
+                  : message.senderType?.toUpperCase() === 'CHATBOT'
                   ? 'bg-green-100 text-green-800'
                   : 'bg-gray-100 text-gray-800'
               }`}
@@ -139,7 +139,7 @@ export default function MyChatLogDetailPage() {
             </div>
 
             {/* Agent 결과 (USER인 경우) */}
-            {message.agentResults && (
+            {isUser && message.agentResults && (
               <div className="mt-3 space-y-2">
                 {/* Intimacy */}
                 <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
