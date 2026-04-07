@@ -88,7 +88,6 @@ export default function MyChatLogDetailPage() {
   // 타입별 렌더링
   const renderMessage = (message: MessageTimelineResponse) => {
     const isUser = message.senderType?.toUpperCase() === 'USER'
-    const isSelectable = true
     const isSelected = selectedMessageIds.has(message.messageId)
 
     return (
