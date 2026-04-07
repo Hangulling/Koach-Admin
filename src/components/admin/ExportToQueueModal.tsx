@@ -45,15 +45,34 @@ export default function ExportToQueueModal({
         minute: '2-digit',
       })
 
+      const senderType = message.senderType?.toUpperCase()
+
       // USER 메시지
-      items.push({
-        id: `user-${message.messageId}`,
-        type: 'user',
-        messageId: message.messageId,
-        time,
-        summary: message.content.slice(0, 50) + (message.content.length > 50 ? '...' : ''),
-        data: message,
-      })
+      if (senderType === 'USER') {
+        items.push({
+          id: `user-${message.messageId}`,
+          type: 'user',
+          messageId: message.messageId,
+          time,
+          summary: message.content.slice(0, 50) + (message.content.length > 50 ? '...' : ''),
+          data: message,
+        })
+      } else {
+        // BOT, SYSTEM 메시지 → conversation 타입으로 등록
+        items.push({
+          id: `conversation-${message.messageId}`,
+          type: 'conversation',
+          messageId: message.messageId,
+          time,
+          summary: message.content.slice(0, 50) + (message.content.length > 50 ? '...' : ''),
+          data: message,
+          queueItem: {
+            type: 'conversation',
+            messageId: message.messageId,
+            content: message.content,
+          },
+        })
+      }
 
       // Agent 결과
       if (message.agentResults) {

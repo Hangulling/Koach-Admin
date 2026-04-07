@@ -71,7 +71,10 @@ export interface PageInfo {
 // 페이징된 관리 필요 내역
 export interface ManagementQueuePageResponse {
   content: ManagementQueueResponse[]
-  page: PageInfo
+  totalPages: number
+  totalElements: number
+  number: number
+  size: number
 }
 
 // === 요청 DTO ===
