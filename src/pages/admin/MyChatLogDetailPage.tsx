@@ -89,7 +89,6 @@ export default function MyChatLogDetailPage() {
   const renderMessage = (message: MessageTimelineResponse) => {
     const isUser = message.senderType?.toUpperCase() === 'USER'
     const isSelectable = true
-    const isSelected = selectedMessageIds.has(message.messageId)
 
     return (
       <div
