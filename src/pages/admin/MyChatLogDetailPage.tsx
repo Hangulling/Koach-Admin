@@ -88,6 +88,7 @@ export default function MyChatLogDetailPage() {
   // 타입별 렌더링
   const renderMessage = (message: MessageTimelineResponse) => {
     const isUser = message.senderType?.toUpperCase() === 'USER'
+    const isSelectable = true
     const isSelected = selectedMessageIds.has(message.messageId)
 
     return (
@@ -96,17 +97,15 @@ export default function MyChatLogDetailPage() {
         className={`border-b border-gray-100 py-4 ${isUser ? 'bg-blue-50' : ''}`}
       >
         <div className="flex items-start gap-4">
-          {/* 체크박스 (USER만) */}
-          {isUser && (
-            <div className="pt-1">
-              <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={() => toggleMessageSelection(message.messageId)}
-                className="w-5 h-5 cursor-pointer"
-              />
-            </div>
-          )}
+          {/* 체크박스 */}
+          <div className="pt-1">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => toggleMessageSelection(message.messageId)}
+              className="w-5 h-5 cursor-pointer"
+            />
+          </div>
 
           {/* 시각 */}
           <div className="w-20 text-sm text-gray-500 flex-shrink-0">
