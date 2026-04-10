@@ -129,8 +129,8 @@ export default function HistoryPage() {
               </table>
               <div className="mt-4 flex justify-between items-center">
                 <div className="text-sm text-gray-600">
-                  총 {logs.page.totalElements}개 중 {logs.page.number * logs.page.size + 1}-
-                  {Math.min((logs.page.number + 1) * logs.page.size, logs.page.totalElements)}개
+                  총 {logs.totalElements}개 중 {logs.number * logs.size + 1}-
+                  {Math.min((logs.number + 1) * logs.size, logs.totalElements)}개
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -142,7 +142,7 @@ export default function HistoryPage() {
                   </Button>
                   <Button
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage >= logs.page.totalPages - 1}
+                    disabled={currentPage >= logs.totalPages - 1}
                     variant="cancel"
                   >
                     다음

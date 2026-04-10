@@ -25,7 +25,10 @@ export interface AuditLogResponse {
 // 페이징된 감사 로그
 export interface AuditLogPageResponse {
   content: AuditLogResponse[]
-  page: PageInfo
+  totalPages: number
+  totalElements: number
+  number: number
+  size: number
 }
 
 // 감사 로그 검색 요청
