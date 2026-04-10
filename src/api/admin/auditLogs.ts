@@ -17,12 +17,10 @@ export interface AdminAuditLogResponse {
 
 export interface AdminAuditLogListResponse {
   content: AdminAuditLogResponse[];
-  page: {
-    number: number;
-    size: number;
-    totalPages: number;
-    totalElements: number;
-  };
+  totalPages: number;
+  totalElements: number;
+  number: number;
+  size: number;
 }
 
 export interface AuditLogQueryParams {

@@ -3,7 +3,6 @@ import type {
   QueueStatus,
   RequestData,
   ResultData,
-  PageInfo
 } from './managementQueue'
 
 // 감사 로그 응답
