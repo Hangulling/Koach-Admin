@@ -5,6 +5,7 @@
  */
 import type { JSX } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { isExpired } from '../utils/authToken'
 
 interface AdminPrivateRouteProps {
   children: JSX.Element
@@ -18,6 +19,15 @@ export default function AdminPrivateRoute({ children }: AdminPrivateRouteProps) 
   // 토큰이 없으면 로그인 페이지로 리다이렉트
   if (!token) {
     console.log('No token found, redirecting to login.')
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  // 만료된 access token이면 즉시 세션 정리 후 로그인 페이지로 이동
+  if (isExpired(token, 30)) {
+    sessionStorage.removeItem('accessToken')
+    sessionStorage.removeItem('refreshToken')
+    sessionStorage.removeItem('adminUser')
+    console.log('Expired token found, clearing session and redirecting to login.')
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 

@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { AUTH_ENDPOINTS } from './endpoints'
+import { isExpired } from '../utils/authToken'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(
   /\/+$/,
@@ -54,9 +55,33 @@ function dropHeader(headers: unknown, name: string) {
 }
 
 function attachAuth(instance: AxiosInstance) {
-  instance.interceptors.request.use(cfg => {
-    const token = tokenService.access
+  instance.interceptors.request.use(async cfg => {
+    let token = tokenService.access
     cfg.headers = cfg.headers ?? {}
+
+    const url = cfg.url || ''
+    const isRefreshEndpoint = url.includes(AUTH_ENDPOINTS.REFRESH_TOKEN)
+
+    // refresh 호출에는 Authorization을 붙이지 않음
+    if (isRefreshEndpoint) {
+      dropHeader(cfg.headers, 'authorization')
+      return cfg
+    }
+
+    // 요청 직전에 access 토큰 만료 여부를 확인하고 선제 갱신
+    if (token && isExpired(token, 30)) {
+      if (isRefreshing) {
+        token = await new Promise(resolve => {
+          addToQueue((newToken: string | null) => resolve(newToken ?? ''))
+        })
+      } else {
+        isRefreshing = true
+        const newToken = await refreshAccessToken()
+        isRefreshing = false
+        onRefreshed(newToken)
+        token = newToken ?? ''
+      }
+    }
 
     if (token && !('Authorization' in cfg.headers)) {
       cfg.headers.Authorization = `Bearer ${token}`
@@ -73,11 +98,6 @@ function attachAuth(instance: AxiosInstance) {
       }
     } catch {
       // adminUser 파싱 실패 시 무시
-    }
-
-    const url = cfg.url || ''
-    if (url.includes(AUTH_ENDPOINTS.REFRESH_TOKEN)) {
-      dropHeader(cfg.headers, 'authorization')
     }
 
     if (import.meta.env.DEV) {
