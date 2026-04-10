@@ -294,8 +294,8 @@ export default function MyAuditLogPage() {
               {/* 페이지네이션 */}
               <div className="mt-4 flex justify-between items-center">
                 <div className="text-sm text-gray-600">
-                  {currentPage + 1} / {auditLogs.page.totalPages} 페이지 (전체{' '}
-                  {auditLogs.page.totalElements}건)
+                  {currentPage + 1} / {auditLogs.totalPages} 페이지 (전체{' '}
+                  {auditLogs.totalElements}건)
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -307,7 +307,7 @@ export default function MyAuditLogPage() {
                   </Button>
                   <Button
                     onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage >= auditLogs.page.totalPages - 1}
+                    disabled={currentPage >= auditLogs.totalPages - 1}
                     variant="cancel"
                   >
                     다음

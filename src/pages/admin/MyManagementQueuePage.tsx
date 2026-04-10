@@ -13,13 +13,11 @@ import type {
   ManagementQueueResponse,
   ManagementQueueCountResponse,
   QueueStatus,
-  QueueType,
 } from '../../types/managementQueue'
 
 export default function MyManagementQueuePage() {
   // 상태 관리
   const [status, setStatus] = useState<QueueStatus>('PENDING')
-  const [queueType, setQueueType] = useState<QueueType | ''>('')
   const [counts, setCounts] = useState<ManagementQueueCountResponse | null>(null)
   const [queues, setQueues] = useState<ManagementQueueResponse[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -49,7 +47,7 @@ export default function MyManagementQueuePage() {
       setError(null)
 
       const response = await getManagementQueueList(
-        queueType || undefined,
+        undefined,
         status,
         currentPage,
         20
@@ -75,7 +73,7 @@ export default function MyManagementQueuePage() {
     loadCounts()
     loadQueues()
     setSelectedIds(new Set()) // 필터 변경 시 선택 초기화
-  }, [status, queueType, currentPage])
+  }, [status, currentPage])
 
   // 체크박스 토글
   const toggleSelect = (id: string) => {
@@ -332,49 +330,6 @@ export default function MyManagementQueuePage() {
           </button>
         </div>
 
-        {/* 큐 타입 필터 */}
-        <div className="mb-4 flex items-center gap-2">
-          <span className="text-sm text-gray-600 mr-2">큐 타입:</span>
-          <button
-            onClick={() => {
-              setQueueType('')
-              setCurrentPage(0)
-            }}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition ${
-              queueType === ''
-                ? 'bg-gray-700 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            전체
-          </button>
-          <button
-            onClick={() => {
-              setQueueType('CORRECTION')
-              setCurrentPage(0)
-            }}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition ${
-              queueType === 'CORRECTION'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            교정 작업
-          </button>
-          <button
-            onClick={() => {
-              setQueueType('DELETION')
-              setCurrentPage(0)
-            }}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition ${
-              queueType === 'DELETION'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            삭제 작업
-          </button>
-        </div>
 
         {/* 타입별 카운트 (표시용) */}
         {counts && (
