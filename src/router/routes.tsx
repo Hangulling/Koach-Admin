@@ -14,6 +14,8 @@ const MyChatLogListPage = lazy(() => import('../pages/admin/MyChatLogListPage'))
 const MyChatLogDetailPage = lazy(() => import('../pages/admin/MyChatLogDetailPage'))
 const MyManagementQueuePage = lazy(() => import('../pages/admin/MyManagementQueuePage'))
 const MyAuditLogPage = lazy(() => import('../pages/admin/MyAuditLogPage'))
+const SupportListPage = lazy(() => import('../pages/admin/SupportListPage'))
+const PostsManagementPage = lazy(() => import('../pages/admin/PostsManagementPage'))
 
 export function Routes() {
   return (
@@ -95,6 +97,25 @@ export function Routes() {
         }
       />
 
+      {/* 문의 내역 */}
+      <Route
+        path="/admin/support"
+        element={
+          <AdminPrivateRoute>
+            <SupportListPage />
+          </AdminPrivateRoute>
+        }
+      />
+
+      {/* 게시글 관리 */}
+      <Route
+        path="/admin/posts"
+        element={
+          <AdminPrivateRoute>
+            <PostsManagementPage />
+          </AdminPrivateRoute>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </RouterRoutes>

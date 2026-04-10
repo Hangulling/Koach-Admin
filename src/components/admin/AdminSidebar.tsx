@@ -21,6 +21,18 @@ type MenuSection = {
 
 const menuSections: MenuSection[] = [
   {
+    title: '문의 내역',
+    items: [
+      { label: '문의 내역 조회', path: '/admin/support' },
+    ],
+  },
+  {
+    title: '게시글 관리',
+    items: [
+      { label: '게시글 조회 및 업데이트', path: '/admin/posts' },
+    ],
+  },
+  {
     title: '채팅 내역 관리',
     items: [
       { label: '채팅 로그 조회', path: '/admin/chat-management/chat-logs' },
