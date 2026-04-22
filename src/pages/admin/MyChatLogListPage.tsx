@@ -143,7 +143,7 @@ export default function MyChatLogListPage() {
 
   // 행 클릭 (상세 페이지로 이동)
   const handleRowClick = (id: string) => {
-    navigate(`/admin/chat-management/chat-logs/${id}`)
+    navigate(`/admin/chat-management/chat-logs/${id}?dataSource=${dataSource}`)
   }
 
   // concept 문자열을 보기 좋게 변환 ("HONEY" → "Honey")

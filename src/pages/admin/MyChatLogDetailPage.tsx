@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import AdminLayout from '../../components/admin/AdminLayout'
 import Button from '../../components/common/Button'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
@@ -10,6 +10,8 @@ import type { MessageTimelinePageResponse, MessageTimelineResponse } from '../..
 export default function MyChatLogDetailPage() {
   const { chatroomId } = useParams<{ chatroomId: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const dataSource = new URLSearchParams(location.search).get('dataSource') ?? 'archive'
 
   // 타임라인 데이터
   const [timeline, setTimeline] = useState<MessageTimelinePageResponse | null>(null)
@@ -35,7 +37,7 @@ export default function MyChatLogDetailPage() {
 
     try {
       setIsLoading(true)
-      const result = await getChatLogTimeline(chatroomId, page, 50)
+      const result = await getChatLogTimeline(chatroomId, page, 50, dataSource)
       setTimeline(result)
       setCurrentPage(page)
     } catch (err) {
