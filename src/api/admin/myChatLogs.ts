@@ -56,11 +56,13 @@ export const searchChatLogs = async (
 export const getChatLogTimeline = async (
   chatroomId: string,
   page: number = 0,
-  size: number = 50
+  size: number = 50,
+  dataSource: string = 'archive'
 ): Promise<MessageTimelinePageResponse> => {
   const searchParams = new URLSearchParams()
   searchParams.set('page', String(page))
   searchParams.set('size', String(size))
+  searchParams.set('dataSource', dataSource)
 
   const response = await api.get<MessageTimelinePageResponse>(
     `${BASE_PATH}/${chatroomId}/timeline?${searchParams.toString()}`
